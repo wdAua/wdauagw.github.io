@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Au的小窝</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+            background-attachment: fixed;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2360a5fa' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        
+        .text-home {
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, #3b82f6, #60a5fa);
+            transition: font-size 0.3s ease;
+        }
+        .text-my {
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, #60a5fa, #3b82f6);
+            transition: font-size 0.3s ease;
+        }
+        .text-contact {
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, #2563eb, #60a5fa);
+            transition: font-size 0.3s ease;
+        }
+        .text-works {
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, #60a5fa, #2563eb);
+            transition: font-size 0.3s ease;
+        }
+        .nav-link:hover span {
+            font-size: 1.1em;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            background-color: rgba(59, 130, 246, 0.9);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 4px;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transform: translate(-50%, -20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .notification.show {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+        
+        .error-message {
+            color: #dc2626;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        .input-error {
+            border-color: #dc2626 !important;
+            box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.2) !important;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal.show {
+            display: flex;
+            opacity: 1;
+        }
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .modal.show .modal-content {
+            transform: translateY(0);
+        }
+        .modal-header {
+            padding: 16px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-body {
+            padding: 16px;
+        }
+        .modal-footer {
+            padding: 16px;
+            border-top: 1px solid #eee;
+            text-align: right;
+        }
+        
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.15), 0 10px 10px -5px rgba(59, 130, 246, 0.08);
+        }
+        
+        .btn-effect {
+            transition: transform 0.1s ease;
+        }
+        .btn-effect:active {
+            transform: scale(0.98);
+        }
+        
+        .img-fade-in {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .img-fade-in.loaded {
+            opacity: 1;
+        }
+        
+        .page-transition {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        #loginPage {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        }
+        
+        #verifyPage {
+            background: linear-gradient(135deg, #e0f2fe 0%, #bfdbfe 100%);
+        }
+        
+        #mainPage {
+            background: linear-gradient(180deg, rgba(224, 242, 254, 0.9) 0%, rgba(219, 234, 254, 0.9) 100%),
+                        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2360a5fa' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            background-attachment: fixed;
+        }
+        
+        #accountManagementPage {
+            background-color: #eff6ff;
+            background-image: radial-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        #verificationPage {
+            background-color: #eff6ff;
+            background-image: radial-gradient(rgba(59, 130, 246, 0.08) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+        
+        .card-hover {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .toggle-slider {
+            background-color: #60a5fa;
+        }
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+        
+        .password-container {
+            position: relative;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #9ca3af;
+            transition: color 0.2s ease;
+        }
+        .toggle-password:hover {
+            color: #3b82f6;
+        }
+        .password-strength {
+            height: 4px;
+            background-color: #e5e7eb;
+            border-radius: 2px;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+        .password-strength-bar {
+            height: 100%;
+            width: 0;
+            transition: width 0.3s ease;
+        }
+        
+        .history-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        .history-time {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        .history-info {
+            font-size: 0.9375rem;
+            color: #1f2937;
+        }
+    </style>
+</head>
+<body>
+    <div class="notification" id="notification"></div>
+
+    <div id="loginPage" class="min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-md w-full page-transition">
+            <div class="text-center mb-6">
+                <h1 class="text-2xl font-bold text-blue-800">Au的小窝</h1>
+                <img src="爱丽丝想玩电脑_1_我的Au啊_.jpg" alt="Au的小窝登录封面" width="146" class="w-32 h-32 mx-auto rounded-full my-4 object-cover border-4 border-blue-100 shadow-md img-fade-in" onload="this.classList.add('loaded')">
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                <div id="loginForm">
+                    <h2 class="text-xl font-bold text-center mb-4 text-blue-800">登录</h2>
+                    
+                    <div class="mb-4">
+                        <label class="block mb-1 text-blue-700">用户名</label>
+                        <input type="text" id="loginUser" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block mb-1 text-blue-700">密码</label>
+                        <div class="password-container">
+                            <input type="password" id="loginPass" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all pr-10">
+                            <i class="fa fa-eye toggle-password" id="toggleLoginPass"></i>
+                        </div>
+                        <div class="error-message" id="loginError">用户名或密码错误，请重新输入</div>
+                    </div>
+                    
+                    <button id="loginBtn" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition-colors btn-effect">登录</button>
+                    
+                    <div class="text-center mt-4">
+                        <span class="text-gray-600">还没有账号？</span>
+                        <button id="showRegisterBtn" class="text-blue-600 hover:underline ml-1 transition-colors btn-effect">注册</button>
+                    </div>
+                </div>
+                
+                <div id="registerForm" class="hidden">
+                    <h2 class="text-xl font-bold text-center mb-4 text-blue-800">注册</h2>
+                    
+                    <div class="mb-4">
+                        <label class="block mb-1 text-blue-700">用户名</label>
+                        <input type="text" id="regUser" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                        <div class="error-message" id="userError">用户名已存在或不符合要求</div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block mb-1 text-blue-700">密码</label>
+                        <div class="password-container">
+                            <input type="password" id="regPass" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all pr-10">
+                            <i class="fa fa-eye toggle-password" id="toggleRegPass"></i>
+                        </div>
+                        <div class="password-strength">
+                            <div class="password-strength-bar" id="regPassStrength"></div>
+                        </div>
+                        <div class="error-message" id="passError">密码长度必须至少6位</div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block mb-1 text-blue-700">确认密码</label>
+                        <div class="password-container">
+                            <input type="password" id="regConfirmPass" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all pr-10">
+                            <i class="fa fa-eye toggle-password" id="toggleConfirmPass"></i>
+                        </div>
+                        <div class="error-message" id="confirmPassError">两次密码输入不一致</div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block mb-1 text-blue-700">邮箱</label>
+                        <input type="email" id="regEmail" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block mb-1 text-blue-700">手机号（选填）</label>
+                        <input type="tel" id="regPhone" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                    </div>
+                    
+                    <button id="registerBtn" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition-colors btn-effect">注册</button>
+                    
+                    <div class="text-center mt-4">
+                        <span class="text-gray-600">已有账号？</span>
+                        <button id="showLoginBtn" class="text-blue-600 hover:underline ml-1 transition-colors btn-effect">登录</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="verifyPage" class="hidden min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full card-hover page-transition">
+            <h2 class="text-xl font-bold text-center mb-6 text-blue-800">人机验证</h2>
+            <p class="text-center mb-8 text-gray-600">请点击下方按钮完成验证</p>
+            
+            <div class="flex justify-center">
+                <button id="verifyBtn" class="w-20 h-20 rounded-full border-4 border-gray-300 flex items-center justify-center hover:border-blue-500 transition-all btn-effect">
+                    <i class="fa fa-check text-3xl text-gray-400"></i>
+                </button>
+            </div>
+            
+            <p class="text-center text-gray-500 text-sm mt-6">点击中间的方框完成验证</p>
+        </div>
+    </div>
+    
+    <div id="mainPage" class="hidden">
+        <nav class="bg-white p-4 shadow sticky top-0 z-50">
+            <div class="container mx-auto">
+                <div class="flex gap-6 flex-wrap">
+                    <a href="#" class="nav-link font-medium flex items-center gap-1" id="homeLink">
+                        <i class="fa fa-home text-blue-600"></i>
+                        <span class="text-home">首页</span>
+                    </a>
+                    <a href="#account-management" class="nav-link font-medium flex items-center gap-1" id="myLink">
+                        <i class="fa fa-user text-blue-600"></i>
+                        <span class="text-my">Au的空间</span>
+                    </a>
+                    <a href="#" class="nav-link font-medium flex items-center gap-1" id="contactLink">
+                        <i class="fa fa-envelope text-blue-600"></i>
+                        <span class="text-contact">联系Au</span>
+                    </a>
+                    <a href="https://www.xiaohongshu.com/user/profile/667b74520000000000030307ba" target="_blank" class="nav-link font-medium flex items-center gap-1">
+                        <i class="fa fa-image text-blue-600"></i>
+                        <span class="text-works">Au的作品</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+        
+        <main class="container mx-auto p-4 py-8">
+            <img src="爱丽丝想玩电脑_1_我的Au啊_.jpg" alt="Au的照片" width="278" class="mx-auto mb-6 rounded-lg shadow-md max-w-full h-auto transform transition-transform duration-500 hover:scale-[1.02] img-fade-in" onload="this.classList.add('loaded')">
+            
+            <p class="my-6 font-medium text-lg text-center text-blue-800">Au的个人小天地</p>
+            
+            <div class="max-w-md mx-auto bg-white rounded-xl shadow-sm p-6 my-8 card-hover">
+                <h3 class="text-lg font-bold mb-4 text-center text-blue-800">关于Au</h3>
+                <div class="space-y-3 my-6">
+                    <p class="flex items-center"><i class="fa fa-play-circle text-blue-500 mr-2"></i> 哔哩哔哩：Au啊</p>
+                    <p class="flex items-center"><i class="fa fa-book text-blue-500 mr-2"></i> 小红书：Au啊</p>
+                    <p class="flex items-center"><i class="fa fa-calendar text-blue-500 mr-2"></i> 入驻时间：2023年6月</p>
+                    <p class="flex items-center"><i class="fa fa-star text-blue-500 mr-2"></i> 兴趣爱好：游戏、创作、分享</p>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <div id="accountManagementPage" class="hidden">
+        <div class="flex h-screen overflow-hidden">
+            <aside class="w-64 bg-white shadow-md hidden md:block transition-all duration-300">
+                <div class="p-5 border-b">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                            <i class="fa fa-user-circle"></i>
+                        </div>
+                        <div>
+                            <h1 class="font-bold" id="sidebarUsername">用户名</h1>
+                            <p class="text-xs text-gray-500">账号管理中心</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <nav class="p-3">
+                    <div class="space-y-1">
+                        <a href="#profile" class="sidebar-item active flex items-center gap-3 px-4 py-3 rounded-lg text-gray-800 hover:bg-blue-50 transition-colors">
+                            <i class="fa fa-user text-blue-600 w-5 text-center"></i>
+                            <span>个人资料</span>
+                        </a>
+                        <a href="#notification" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-blue-50 transition-colors">
+                            <i class="fa fa-bell text-blue-600 w-5 text-center"></i>
+                            <span>通知设置</span>
+                        </a>
+                        <a href="#login-history" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-blue-50 transition-colors">
+                            <i class="fa fa-history text-blue-600 w-5 text-center"></i>
+                            <span>登录历史</span>
+                        </a>
+                    </div>
+                    
+                    <div class="mt-8 pt-4 border-t">
+                        <a href="#logout" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors btn-effect" id="logoutLink">
+                            <i class="fa fa-sign-out w-5 text-center"></i>
+                            <span>退出登录</span>
+                        </a>
+                    </div>
+                </nav>
+            </aside>
+            
+            <main class="flex-1 overflow-y-auto">
+                <header class="bg-white shadow-sm sticky top-0 z-10">
+                    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+                        <h2 class="text-xl font-bold text-gray-800" id="pageTitle">个人资料</h2>
+                        <div class="flex items-center gap-4">
+                            <button class="md:hidden text-gray-600 btn-effect" id="mobileMenuBtn">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            <a href="#" class="text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1 btn-effect" id="backToMain">
+                                <i class="fa fa-arrow-left"></i>
+                                <span class="hidden sm:inline">返回首页</span>
+                            </a>
+                        </div>
+                    </div>
+                </header>
+                
+                <div class="tab-content active" id="profileTab">
+                    <div class="container mx-auto px-4 py-6">
+                        <div class="bg-white rounded-xl shadow-sm p-6 mb-6 card-hover">
+                            <div class="flex flex-col md:flex-row gap-8">
+                                <div class="md:w-1/3">
+                                    <div class="text-center md:text-left">
+                                        <div class="inline-block relative mb-4">
+                                            <div class="w-32 h-32 rounded-full bg-gray-200 overflow-hidden border-4 border-white shadow-sm">
+                                                <img src="爱丽丝想玩电脑_1_我的Au啊_.jpg" alt="用户头像" width="300" class="w-full h-full object-cover">
+                                            </div>
+                                            <button class="absolute bottom-0 right-0 w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-md btn-effect" id="changeAvatarBtn">
+                                                <i class="fa fa-camera"></i>
+                                            </button>
+                                        </div>
+                                        <p class="text-sm text-gray-500">支持 JPG、PNG 格式，大小不超过 5MB</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="md:w-2/3 space-y-5">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
+                                        <input type="text" id="profileUsername" value="" class="form-input w-full px-4 py-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">昵称</label>
+                                        <input type="text" id="profileNickname" value="" class="form-input w-full px-4 py-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">个人简介</label>
+                                        <textarea rows="3" class="form-input w-full px-4 py-2.5 border border-gray-300 rounded-lg outline-none resize-none focus:ring-2 focus:ring-blue-500 transition-all" id="profileBio"></textarea>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">性别</label>
+                                        <div class="flex gap-4">
+                                            <label class="inline-flex items-center gap-2 cursor-pointer">
+                                                <input type="radio" name="gender" checked class="text-blue-600 focus:ring-blue-500">
+                                                <span>男</span>
+                                            </label>
+                                            <label class="inline-flex items-center gap-2 cursor-pointer">
+                                                <input type="radio" name="gender" class="text-blue-600 focus:ring-blue-500">
+                                                <span>女</span>
+                                            </label>
+                                            <label class="inline-flex items-center gap-2 cursor-pointer">
+                                                <input type="radio" name="gender" class="text-blue-600 focus:ring-blue-500">
+                                                <span>保密</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex justify-end gap-3 pt-2">
+                                        <button class="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors btn-effect" id="cancelProfile">取消</button>
+                                        <button id="saveProfileBtn" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors btn-effect">保存修改</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+                            <h3 class="font-bold text-gray-800 mb-4">账号状态</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center pb-4 border-b">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                                            <i class="fa fa-envelope"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">邮箱验证</p>
+                                            <p class="text-sm text-gray-500" id="emailDisplay">已验证 • 366*******@qq.com</p>
+                                        </div>
+                                    </div>
+                                    <button class="text-blue-600 text-sm hover:underline btn-effect" id="editEmailBtn">修改</button>
+                                </div>
+                                
+                                <div class="flex justify-between items-center pb-4 border-b">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full" id="phoneStatusBg">
+                                            <i class="fa fa-phone" id="phoneStatusIcon"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">手机验证</p>
+                                            <p class="text-sm text-gray-500" id="phoneDisplay">未验证</p>
+                                        </div>
+                                    </div>
+                                    <button class="text-blue-600 text-sm hover:underline btn-effect" id="editPhoneBtn">绑定</button>
+                                </div>
+                                
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full" id="idVerifyStatusBg">
+                                            <i class="fa fa-shield" id="idVerifyStatusIcon"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">实名认证</p>
+                                            <p class="text-sm text-gray-500" id="idVerifyDisplay">未认证</p>
+                                        </div>
+                                    </div>
+                                    <button class="text-blue-600 text-sm hover:underline btn-effect" id="goToVerification">去认证</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="notificationTab">
+                    <div class="container mx-auto px-4 py-6">
+                        <div class="bg-white rounded-xl shadow-sm p-6 mb-6 card-hover">
+                            <h3 class="font-bold text-gray-800 mb-6">通知方式</h3>
+                            
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center pb-4 border-b">
+                                    <div>
+                                        <p class="font-medium">站内通知</p>
+                                        <p class="text-sm text-gray-500">在网站内接收通知</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" checked id="siteNotification">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="flex justify-between items-center pb-4 border-b">
+                                    <div>
+                                        <p class="font-medium">邮件通知</p>
+                                        <p class="text-sm text-gray-500">通过邮件接收重要通知</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" checked id="emailNotification">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="font-medium">短信通知</p>
+                                        <p class="text-sm text-gray-500">通过短信接收重要通知</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="smsNotification" disabled>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+                            <h3 class="font-bold text-gray-800 mb-6">通知类型</h3>
+                            
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center pb-4 border-b">
+                                    <div>
+                                        <p class="font-medium">评论通知</p>
+                                        <p class="text-sm text-gray-500">有人评论你的内容时通知</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" checked id="commentNotification">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="flex justify-between items-center pb-4 border-b">
+                                    <div>
+                                        <p class="font-medium">点赞通知</p>
+                                        <p class="text-sm text-gray-500">有人点赞你的内容时通知</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" checked id="likeNotification">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="flex justify-between items-center pb-4 border-b">
+                                    <div>
+                                        <p class="font-medium">关注通知</p>
+                                        <p class="text-sm text-gray-500">有人关注你时通知</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" checked id="followNotification">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="flex justify-between items-center pb-4 border-b">
+                                    <div>
+                                        <p class="font-medium">系统通知</p>
+                                        <p class="text-sm text-gray-500">接收系统重要通知</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" checked id="systemNotification" disabled>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="flex justify-between items-center pb-4 border-b">
+                                    <div>
+                                        <p class="font-medium">活动通知</p>
+                                        <p class="text-sm text-gray-500">接收平台活动相关通知</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="activityNotification">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="font-medium">广告推送</p>
+                                        <p class="text-sm text-gray-500">接收平台推广和广告信息</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="adNotification">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="login-historyTab">
+                    <div class="container mx-auto px-4 py-6">
+                        <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+                            <h3 class="font-bold text-gray-800 mb-6">登录历史</h3>
+                            
+                            <div class="mb-6">
+                                <p class="font-medium text-gray-700 mb-2">账号创建时间</p>
+                                <p class="text-gray-600" id="accountCreationTime">--</p>
+                            </div>
+                            
+                            <div>
+                                <p class="font-medium text-gray-700 mb-4">最近登录记录</p>
+                                <div id="loginHistoryContainer" class="space-y-2">
+                                    <div class="text-gray-500 text-center py-6">
+                                        暂无登录记录
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="verificationPage" class="hidden">
+        <div class="flex h-screen overflow-hidden">
+            <aside class="w-64 bg-white shadow-md hidden md:block transition-all duration-300">
+                <div class="p-5 border-b">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                            <i class="fa fa-user-circle"></i>
+                        </div>
+                        <div>
+                            <h1 class="font-bold" id="verificationUsername">用户名</h1>
+                            <p class="text-xs text-gray-500">实名认证</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+            
+            <main class="flex-1 overflow-y-auto bg-gray-50">
+                <header class="bg-white shadow-sm sticky top-0 z-10">
+                    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+                        <h2 class="text-xl font-bold text-gray-800">实名认证</h2>
+                        <div class="flex items-center gap-4">
+                            <button class="md:hidden text-gray-600 btn-effect" id="verificationMobileMenuBtn">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            <a href="#account-management" class="text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1 btn-effect" id="backToAccount">
+                                <i class="fa fa-arrow-left"></i>
+                                <span class="hidden sm:inline">返回账号中心</span>
+                            </a>
+                        </div>
+                    </div>
+                </header>
+                
+                <div class="container mx-auto px-4 py-8">
+                    <div class="max-w-md mx-auto bg-white rounded-xl shadow-sm p-6 card-hover">
+                        <h3 class="text-lg font-bold mb-4 text-center text-blue-800">身份信息填写</h3>
+                        <p class="text-sm text-gray-500 text-center mb-6">请填写真实身份信息完成实名认证</p>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">真实姓名</label>
+                                <input type="text" id="realName" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                                <div class="error-message" id="nameError">请输入真实姓名</div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">身份证号</label>
+                                <input type="text" id="idCard" placeholder="18位身份证号码" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                                <div class="error-message" id="idError">请输入正确的身份证号</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-8 flex justify-center">
+                            <button class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors btn-effect" id="submitVerification">完成认证</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="editEmailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="text-xl font-bold text-blue-800">修改邮箱</h3>
+                <button class="text-gray-500 hover:text-gray-700 btn-effect" id="closeEmailModal">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">新邮箱地址</label>
+                        <input type="email" id="newEmail" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                        <div class="error-message" id="emailFormatError">请输入有效的邮箱地址</div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">当前密码</label>
+                        <div class="password-container">
+                            <input type="password" id="emailPassword" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all pr-10">
+                            <i class="fa fa-eye toggle-password" id="toggleEmailPassword"></i>
+                        </div>
+                        <div class="error-message" id="emailPasswordError">密码不正确</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors btn-effect" id="cancelEmailEdit">取消</button>
+                <button class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors btn-effect" id="confirmEmailEdit">确认修改</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="editPhoneModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="text-xl font-bold text-blue-800" id="phoneModalTitle">绑定手机号</h3>
+                <button class="text-gray-500 hover:text-gray-700 btn-effect" id="closePhoneModal">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">手机号码</label>
+                        <input type="tel" id="newPhone" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                        <div class="error-message" id="phoneFormatError">请输入有效的手机号码</div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">当前密码</label>
+                        <div class="password-container">
+                            <input type="password" id="phonePassword" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all pr-10">
+                            <i class="fa fa-eye toggle-password" id="togglePhonePassword"></i>
+                        </div>
+                        <div class="error-message" id="phonePasswordError">密码不正确</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors btn-effect" id="cancelPhoneEdit">取消</button>
+                <button class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors btn-effect" id="confirmPhoneEdit">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="text-xl font-bold text-blue-800">联系Au</h3>
+                <button id="closeContactModal" class="text-gray-500 hover:text-gray-700 btn-effect">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="contactForm">
+                    <div class="mb-4">
+                        <label class="block mb-1 font-medium text-gray-700">您的匿名</label>
+                        <input type="text" class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block mb-1 font-medium text-gray-700">联系邮箱</label>
+                        <input type="email" class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block mb-1 font-medium text-gray-700">主题</label>
+                        <select class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                            <option>爱爱awa</option>
+                            <option>游戏玩耍</option>
+                            <option>视频提议</option>
+                            <option>其他事项</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block mb-1 font-medium text-gray-700">留言内容</label>
+                        <textarea rows="4" class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"></textarea>
+                    </div>
+                </form>
+                
+                <div class="mt-6 pt-6 border-t">
+                    <h4 class="font-bold mb-3 text-blue-800">其他联系方式</h4>
+                    <div class="space-y-2">
+                        <p class="flex items-center"><i class="fa fa-envelope text-blue-500 mr-3 w-5 text-center"></i> 366*******@qq.com</p>
+                        <p class="flex items-center"><i class="fa fa-phone text-blue-500 mr-3 w-5 text-center"></i> 166-xxxx-2402</p>
+                        <p class="flex items-center"><i class="fa fa-weixin text-blue-500 mr-3 w-5 text-center"></i> Au啊</p>
+                        <p class="flex items-center"><i class="fa fa-weibo text-blue-500 mr-3 w-5 text-center"></i> @Au啊</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="submitContact" class="px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors btn-effect">
+                    提交留言
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const loginPage = document.getElementById('loginPage');
+        const verifyPage = document.getElementById('verifyPage');
+        const mainPage = document.getElementById('mainPage');
+        const accountManagementPage = document.getElementById('accountManagementPage');
+        const verificationPage = document.getElementById('verificationPage');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const verifyBtn = document.getElementById('verifyBtn');
+        const myLink = document.getElementById('myLink');
+        const homeLink = document.getElementById('homeLink');
+        const contactLink = document.getElementById('contactLink');
+        const backToMain = document.getElementById('backToMain');
+        const backToAccount = document.getElementById('backToAccount');
+        const logoutLink = document.getElementById('logoutLink');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const verificationMobileMenuBtn = document.getElementById('verificationMobileMenuBtn');
+        const notification = document.getElementById('notification');
+        const contactModal = document.getElementById('contactModal');
+        const closeContactModal = document.getElementById('closeContactModal');
+        const submitContact = document.getElementById('submitContact');
+        const loginError = document.getElementById('loginError');
+        const loginUser = document.getElementById('loginUser');
+        const loginPass = document.getElementById('loginPass');
+        const goToVerification = document.getElementById('goToVerification');
+        const submitVerification = document.getElementById('submitVerification');
+        const sidebarUsername = document.getElementById('sidebarUsername');
+        const verificationUsername = document.getElementById('verificationUsername');
+        const profileUsername = document.getElementById('profileUsername');
+        const profileNickname = document.getElementById('profileNickname');
+        const profileBio = document.getElementById('profileBio');
+        const saveProfileBtn = document.getElementById('saveProfileBtn');
+        const cancelProfile = document.getElementById('cancelProfile');
+        const emailDisplay = document.getElementById('emailDisplay');
+        const phoneDisplay = document.getElementById('phoneDisplay');
+        const phoneStatusBg = document.getElementById('phoneStatusBg');
+        const phoneStatusIcon = document.getElementById('phoneStatusIcon');
+        const idVerifyStatusBg = document.getElementById('idVerifyStatusBg');
+        const idVerifyStatusIcon = document.getElementById('idVerifyStatusIcon');
+        const idVerifyDisplay = document.getElementById('idVerifyDisplay');
+        const editEmailBtn = document.getElementById('editEmailBtn');
+        const editPhoneBtn = document.getElementById('editPhoneBtn');
+        const editEmailModal = document.getElementById('editEmailModal');
+        const editPhoneModal = document.getElementById('editPhoneModal');
+        const phoneModalTitle = document.getElementById('phoneModalTitle');
+        const closeEmailModal = document.getElementById('closeEmailModal');
+        const closePhoneModal = document.getElementById('closePhoneModal');
+        const cancelEmailEdit = document.getElementById('cancelEmailEdit');
+        const cancelPhoneEdit = document.getElementById('cancelPhoneEdit');
+        const confirmEmailEdit = document.getElementById('confirmEmailEdit');
+        const confirmPhoneEdit = document.getElementById('confirmPhoneEdit');
+        const newEmail = document.getElementById('newEmail');
+        const newPhone = document.getElementById('newPhone');
+        const emailPassword = document.getElementById('emailPassword');
+        const phonePassword = document.getElementById('phonePassword');
+        const emailFormatError = document.getElementById('emailFormatError');
+        const emailPasswordError = document.getElementById('emailPasswordError');
+        const phoneFormatError = document.getElementById('phoneFormatError');
+        const phonePasswordError = document.getElementById('phonePasswordError');
+        const userError = document.getElementById('userError');
+        const passError = document.getElementById('passError');
+        const confirmPassError = document.getElementById('confirmPassError');
+        const pageTitle = document.getElementById('pageTitle');
+        const changeAvatarBtn = document.getElementById('changeAvatarBtn');
+        const smsNotification = document.getElementById('smsNotification');
+        const regPass = document.getElementById('regPass');
+        const regConfirmPass = document.getElementById('regConfirmPass');
+        const regPassStrength = document.getElementById('regPassStrength');
+        const accountCreationTime = document.getElementById('accountCreationTime');
+        const loginHistoryContainer = document.getElementById('loginHistoryContainer');
+        
+        let currentUser = null;
+        let users = {};
+        
+        function showNotification(message) {
+            notification.textContent = message;
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000);
+        }
+        
+        function clearLoginError() {
+            loginError.style.display = 'none';
+            loginUser.classList.remove('input-error');
+            loginPass.classList.remove('input-error');
+        }
+        
+        function updateUserInfo() {
+            if (currentUser && users[currentUser]) {
+                sidebarUsername.textContent = currentUser;
+                verificationUsername.textContent = currentUser;
+                profileUsername.value = currentUser;
+                profileNickname.value = users[currentUser].nickname || currentUser;
+                profileBio.value = users[currentUser].bio || '';
+                
+                const creationDate = new Date(users[currentUser].creationTime);
+                accountCreationTime.textContent = formatDateTime(creationDate);
+                
+                updateLoginHistory();
+                
+                const email = users[currentUser].email || '';
+                if (email) {
+                    const maskedEmail = email.replace(/(.{3})(.*)(@.*)/, '$1****$3');
+                    emailDisplay.textContent = `已验证 • ${maskedEmail}`;
+                }
+                
+                const phone = users[currentUser].phone || '';
+                if (phone) {
+                    const maskedPhone = phone.replace(/(\d{3})(\d{4})(\d{4})/, '$1****$3');
+                    phoneDisplay.textContent = `已验证 • ${maskedPhone}`;
+                    phoneStatusBg.className = 'w-10 h-10 rounded-full bg-green-100 flex items-center justify-center';
+                    phoneStatusIcon.className = 'fa fa-phone text-green-600';
+                    editPhoneBtn.textContent = '修改';
+                    phoneModalTitle.textContent = '修改手机号';
+                    smsNotification.disabled = false;
+                } else {
+                    phoneDisplay.textContent = '未验证';
+                    phoneStatusBg.className = 'w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center';
+                    phoneStatusIcon.className = 'fa fa-phone text-gray-600';
+                    editPhoneBtn.textContent = '绑定';
+                    phoneModalTitle.textContent = '绑定手机号';
+                    smsNotification.disabled = true;
+                    smsNotification.checked = false;
+                }
+                
+                if (users[currentUser].idVerified) {
+                    idVerifyDisplay.textContent = '已认证';
+                    idVerifyStatusBg.className = 'w-10 h-10 rounded-full bg-green-100 flex items-center justify-center';
+                    idVerifyStatusIcon.className = 'fa fa-shield text-green-600';
+                    goToVerification.textContent = '已认证';
+                    goToVerification.classList.add('text-gray-500', 'cursor-default');
+                    goToVerification.classList.remove('text-blue-600', 'hover:underline', 'btn-effect');
+                } else {
+                    idVerifyDisplay.textContent = '未认证';
+                    idVerifyStatusBg.className = 'w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center';
+                    idVerifyStatusIcon.className = 'fa fa-shield text-gray-600';
+                    goToVerification.textContent = '去认证';
+                    goToVerification.classList.remove('text-gray-500', 'cursor-default');
+                    goToVerification.classList.add('text-blue-600', 'hover:underline', 'btn-effect');
+                }
+                
+                document.querySelectorAll('input[name="gender"]').forEach(radio => {
+                    radio.checked = radio.nextElementSibling.textContent === users[currentUser].gender;
+                });
+            }
+        }
+        
+        function switchTab(tabId, title) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+                item.classList.add('text-gray-600');
+                item.classList.remove('text-gray-800');
+            });
+            
+            document.getElementById(tabId).classList.add('active');
+            pageTitle.textContent = title;
+            
+            const activeItem = document.querySelector(`.sidebar-item[href="#${tabId.replace('Tab', '')}"]`);
+            if (activeItem) {
+                activeItem.classList.add('active', 'text-gray-800');
+                activeItem.classList.remove('text-gray-600');
+            }
+        }
+        
+        function resetVerificationButton() {
+            verifyBtn.innerHTML = '<i class="fa fa-check text-3xl text-gray-400"></i>';
+            verifyBtn.classList.remove('border-green-500');
+            verifyBtn.disabled = false;
+        }
+        
+        function togglePasswordVisibility(toggleBtn) {
+            const passwordInput = toggleBtn.previousElementSibling;
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            toggleBtn.classList.toggle('fa-eye');
+            toggleBtn.classList.toggle('fa-eye-slash');
+        }
+        
+        function updatePasswordStrength(password) {
+            let strength = 0;
+            
+            if (password.length >= 6) strength += 33;
+            if (password.length >= 8) strength += 33;
+            if (password.length >= 10) strength += 34;
+            
+            regPassStrength.style.width = `${strength}%`;
+            
+            if (strength === 0) {
+                regPassStrength.style.backgroundColor = '';
+            } else if (strength <= 33) {
+                regPassStrength.style.backgroundColor = '#ef4444';
+            } else if (strength <= 66) {
+                regPassStrength.style.backgroundColor = '#f59e0b';
+            } else {
+                regPassStrength.style.backgroundColor = '#10b981';
+            }
+        }
+        
+        function formatDateTime(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        }
+        
+        function addLoginRecord(username) {
+            if (!users[username] || !users[username].loginHistory) {
+                users[username].loginHistory = [];
+            }
+            
+            const now = new Date();
+            users[username].loginHistory.unshift({
+                time: now.getTime(),
+                device: "Windows 10 · Chrome"
+            });
+            
+            if (users[username].loginHistory.length > 10) {
+                users[username].loginHistory = users[username].loginHistory.slice(0, 10);
+            }
+        }
+        
+        function updateLoginHistory() {
+            if (!currentUser || !users[currentUser] || !users[currentUser].loginHistory || users[currentUser].loginHistory.length === 0) {
+                loginHistoryContainer.innerHTML = '<div class="text-gray-500 text-center py-6">暂无登录记录</div>';
+                return;
+            }
+            
+            let html = '';
+            users[currentUser].loginHistory.forEach(record => {
+                const date = new Date(record.time);
+                html += `
+                    <div class="history-item">
+                        <div class="history-time">${formatDateTime(date)}</div>
+                        <div class="history-info">设备: ${record.device}</div>
+                    </div>
+                `;
+            });
+            
+            loginHistoryContainer.innerHTML = html;
+        }
+        
+        document.getElementById('showRegisterBtn').addEventListener('click', function() {
+            clearLoginError();
+            userError.style.display = 'none';
+            passError.style.display = 'none';
+            confirmPassError.style.display = 'none';
+            regPassStrength.style.width = '0';
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+            registerForm.classList.add('page-transition');
+        });
+        
+        document.getElementById('showLoginBtn').addEventListener('click', function() {
+            registerForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+            loginForm.classList.add('page-transition');
+        });
+        
+        document.getElementById('loginBtn').addEventListener('click', function() {
+            const username = loginUser.value.trim();
+            const password = loginPass.value;
+            
+            clearLoginError();
+            
+            if (!username || !password) {
+                alert('请输入用户名和密码');
+                return;
+            }
+            
+            if (users[username] && users[username].password === password) {
+                currentUser = username;
+                addLoginRecord(username);
+                loginPage.classList.add('hidden');
+                verifyPage.classList.remove('hidden');
+                resetVerificationButton();
+            } else {
+                loginError.style.display = 'block';
+                loginUser.classList.add('input-error');
+                loginPass.classList.add('input-error');
+                loginPass.value = '';
+                loginPass.focus();
+            }
+        });
+        
+        loginUser.addEventListener('input', clearLoginError);
+        loginPass.addEventListener('input', clearLoginError);
+        
+        document.getElementById('registerBtn').addEventListener('click', function() {
+            const username = document.getElementById('regUser').value.trim();
+            const password = regPass.value;
+            const confirmPass = regConfirmPass.value;
+            const email = document.getElementById('regEmail').value.trim();
+            const phone = document.getElementById('regPhone').value.trim();
+            
+            let isValid = true;
+            
+            userError.style.display = 'none';
+            passError.style.display = 'none';
+            confirmPassError.style.display = 'none';
+            document.getElementById('regUser').classList.remove('input-error');
+            regPass.classList.remove('input-error');
+            regConfirmPass.classList.remove('input-error');
+            
+            if (!username || username.length < 3 || username.length > 20) {
+                userError.textContent = '用户名长度必须在3-20个字符之间';
+                userError.style.display = 'block';
+                document.getElementById('regUser').classList.add('input-error');
+                isValid = false;
+            }
+            
+            if (users[username]) {
+                userError.textContent = '用户名已存在';
+                userError.style.display = 'block';
+                document.getElementById('regUser').classList.add('input-error');
+                isValid = false;
+            }
+            
+            if (!password || password.length < 6) {
+                passError.style.display = 'block';
+                regPass.classList.add('input-error');
+                isValid = false;
+            }
+            
+            if (password !== confirmPass) {
+                confirmPassError.style.display = 'block';
+                regConfirmPass.classList.add('input-error');
+                isValid = false;
+            }
+            
+            if (!email) {
+                alert('请输入邮箱地址');
+                isValid = false;
+            } else {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    alert('请输入有效的邮箱地址');
+                    isValid = false;
+                }
+            }
+            
+            if (phone) {
+                const phoneRegex = /^1[3-9]\d{9}$/;
+                if (!phoneRegex.test(phone)) {
+                    alert('请输入有效的手机号码');
+                    isValid = false;
+                }
+            }
+            
+            if (isValid) {
+                const now = new Date();
+                users[username] = {
+                    password: password,
+                    email: email,
+                    phone: phone,
+                    nickname: username,
+                    bio: '',
+                    gender: '保密',
+                    idVerified: false,
+                    realName: "",
+                    idCard: "",
+                    creationTime: now.getTime(),
+                    loginHistory: []
+                };
+                
+                addLoginRecord(username);
+                
+                showNotification('注册成功，请登录');
+                registerForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+                
+                document.getElementById('regUser').value = '';
+                regPass.value = '';
+                regConfirmPass.value = '';
+                document.getElementById('regEmail').value = '';
+                document.getElementById('regPhone').value = '';
+                regPassStrength.style.width = '0';
+            }
+        });
+        
+        regPass.addEventListener('input', function() {
+            const password = this.value;
+            updatePasswordStrength(password);
+            
+            if (password.length < 6) {
+                passError.style.display = 'block';
+                this.classList.add('input-error');
+            } else {
+                passError.style.display = 'none';
+                this.classList.remove('input-error');
+            }
+            
+            if (regConfirmPass.value && password !== regConfirmPass.value) {
+                confirmPassError.style.display = 'block';
+                regConfirmPass.classList.add('input-error');
+            } else {
+                confirmPassError.style.display = 'none';
+                regConfirmPass.classList.remove('input-error');
+            }
+        });
+        
+        regConfirmPass.addEventListener('input', function() {
+            const confirmPassword = this.value;
+            
+            if (confirmPassword && regPass.value !== confirmPassword) {
+                confirmPassError.style.display = 'block';
+                this.classList.add('input-error');
+            } else {
+                confirmPassError.style.display = 'none';
+                this.classList.remove('input-error');
+            }
+        });
+        
+        verifyBtn.addEventListener('click', function() {
+            this.innerHTML = '<i class="fa fa-check text-3xl text-green-500"></i>';
+            this.classList.add('border-green-500');
+            this.disabled = true;
+            
+            setTimeout(() => {
+                verifyPage.classList.add('hidden');
+                mainPage.classList.remove('hidden');
+            }, 800);
+        });
+        
+        homeLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            if (!mainPage.classList.contains('hidden')) {
+                showNotification('您已经在首页了');
+            } else {
+                accountManagementPage.classList.add('hidden');
+                verificationPage.classList.add('hidden');
+                mainPage.classList.remove('hidden');
+            }
+        });
+        
+        contactLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            contactModal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        });
+        
+        closeContactModal.addEventListener('click', function() {
+            contactModal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        });
+        
+        submitContact.addEventListener('click', function() {
+            showNotification('留言已提交，我们会尽快回复您');
+            contactModal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        });
+        
+        contactModal.addEventListener('click', function(e) {
+            if (e.target === contactModal) {
+                contactModal.classList.remove('show');
+                document.body.style.overflow = 'auto';
+            }
+        });
+        
+        myLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            mainPage.classList.add('hidden');
+            verificationPage.classList.add('hidden');
+            accountManagementPage.classList.remove('hidden');
+            updateUserInfo();
+            switchTab('profileTab', '个人资料');
+        });
+        
+        backToMain.addEventListener('click', function(e) {
+            e.preventDefault();
+            accountManagementPage.classList.add('hidden');
+            mainPage.classList.remove('hidden');
+        });
+        
+        backToAccount.addEventListener('click', function(e) {
+            e.preventDefault();
+            verificationPage.classList.add('hidden');
+            accountManagementPage.classList.remove('hidden');
+            updateUserInfo();
+            switchTab('profileTab', '个人资料');
+        });
+        
+        logoutLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (confirm('确定要退出登录吗？')) {
+                currentUser = null;
+                
+                accountManagementPage.classList.add('hidden');
+                verificationPage.classList.add('hidden');
+                mainPage.classList.add('hidden');
+                verifyPage.classList.add('hidden');
+                
+                loginPage.classList.remove('hidden');
+                
+                loginUser.value = '';
+                loginPass.value = '';
+                clearLoginError();
+                
+                showNotification('已成功退出登录');
+            }
+        });
+        
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (this.id !== 'logoutLink') {
+                    e.preventDefault();
+                    
+                    const tabName = this.getAttribute('href').substring(1);
+                    const title = this.querySelector('span').textContent;
+                    switchTab(`${tabName}Tab`, title);
+                    
+                    if (window.innerWidth < 768) {
+                        const sidebar = document.querySelector('#accountManagementPage aside');
+                        sidebar.classList.add('hidden');
+                    }
+                }
+            });
+        });
+        
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', function() {
+                const sidebar = document.querySelector('#accountManagementPage aside');
+                sidebar.classList.toggle('hidden');
+                sidebar.classList.toggle('fixed');
+                sidebar.classList.toggle('z-50');
+                sidebar.classList.toggle('h-full');
+            });
+        }
+        
+        if (verificationMobileMenuBtn) {
+            verificationMobileMenuBtn.addEventListener('click', function() {
+                const sidebar = document.querySelector('#verificationPage aside');
+                sidebar.classList.toggle('hidden');
+                sidebar.classList.toggle('fixed');
+                sidebar.classList.toggle('z-50');
+                sidebar.classList.toggle('h-full');
+            });
+        }
+        
+        saveProfileBtn.addEventListener('click', function() {
+            if (!currentUser) return;
+            
+            const newUsername = profileUsername.value.trim();
+            const newNickname = profileNickname.value.trim();
+            const newBio = profileBio.value.trim();
+            const newGender = document.querySelector('input[name="gender"]:checked').nextElementSibling.textContent;
+            
+            if (!newUsername) {
+                alert('用户名不能为空');
+                return;
+            }
+            
+            if (newUsername !== currentUser && users[newUsername]) {
+                alert('用户名已存在');
+                return;
+            }
+            
+            if (newUsername !== currentUser) {
+                const loginHistory = users[currentUser].loginHistory;
+                const creationTime = users[currentUser].creationTime;
+                
+                users[newUsername] = {...users[currentUser]};
+                users[newUsername].loginHistory = loginHistory;
+                users[newUsername].creationTime = creationTime;
+                
+                delete users[currentUser];
+                currentUser = newUsername;
+            }
+            
+            users[currentUser].nickname = newNickname;
+            users[currentUser].bio = newBio;
+            users[currentUser].gender = newGender;
+            
+            updateUserInfo();
+            showNotification('资料已保存');
+        });
+        
+        cancelProfile.addEventListener('click', function() {
+            updateUserInfo();
+        });
+        
+        editEmailBtn.addEventListener('click', function() {
+            editEmailModal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+            newEmail.value = '';
+            emailPassword.value = '';
+            emailFormatError.style.display = 'none';
+            emailPasswordError.style.display = 'none';
+        });
+        
+        editPhoneBtn.addEventListener('click', function() {
+            editPhoneModal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+            newPhone.value = '';
+            phonePassword.value = '';
+            phoneFormatError.style.display = 'none';
+            phonePasswordError.style.display = 'none';
+        });
+        
+        closeEmailModal.addEventListener('click', function() {
+            editEmailModal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        });
+        
+        closePhoneModal.addEventListener('click', function() {
+            editPhoneModal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        });
+        
+        cancelEmailEdit.addEventListener('click', function() {
+            editEmailModal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        });
+        
+        cancelPhoneEdit.addEventListener('click', function() {
+            editPhoneModal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        });
+        
+        confirmEmailEdit.addEventListener('click', function() {
+            if (!currentUser) return;
+            
+            const email = newEmail.value.trim();
+            const password = emailPassword.value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            emailFormatError.style.display = 'none';
+            emailPasswordError.style.display = 'none';
+            newEmail.classList.remove('input-error');
+            emailPassword.classList.remove('input-error');
+            
+            if (!emailRegex.test(email)) {
+                emailFormatError.style.display = 'block';
+                newEmail.classList.add('input-error');
+                return;
+            }
+            
+            if (password !== users[currentUser].password) {
+                emailPasswordError.style.display = 'block';
+                emailPassword.classList.add('input-error');
+                return;
+            }
+            
+            users[currentUser].email = email;
+            updateUserInfo();
+            
+            editEmailModal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+            showNotification('邮箱修改成功');
+        });
+        
+        confirmPhoneEdit.addEventListener('click', function() {
+            if (!currentUser) return;
+            
+            const phone = newPhone.value.trim();
+            const password = phonePassword.value;
+            const phoneRegex = /^1[3-9]\d{9}$/;
+            
+            phoneFormatError.style.display = 'none';
+            phonePasswordError.style.display = 'none';
+            newPhone.classList.remove('input-error');
+            phonePassword.classList.remove('input-error');
+            
+            if (!phoneRegex.test(phone)) {
+                phoneFormatError.style.display = 'block';
+                newPhone.classList.add('input-error');
+                return;
+            }
+            
+            if (password !== users[currentUser].password) {
+                phonePasswordError.style.display = 'block';
+                phonePassword.classList.add('input-error');
+                return;
+            }
+            
+            users[currentUser].phone = phone;
+            updateUserInfo();
+            
+            editPhoneModal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+            
+            if (phoneModalTitle.textContent === '绑定手机号') {
+                showNotification('手机号绑定成功');
+            } else {
+                showNotification('手机号修改成功');
+            }
+        });
+        
+        editEmailModal.addEventListener('click', function(e) {
+            if (e.target === editEmailModal) {
+                editEmailModal.classList.remove('show');
+                document.body.style.overflow = 'auto';
+            }
+        });
+        
+        editPhoneModal.addEventListener('click', function(e) {
+            if (e.target === editPhoneModal) {
+                editPhoneModal.classList.remove('show');
+                document.body.style.overflow = 'auto';
+            }
+        });
+        
+        goToVerification.addEventListener('click', function() {
+            if (currentUser && users[currentUser] && users[currentUser].idVerified) {
+                return;
+            }
+            
+            accountManagementPage.classList.add('hidden');
+            verificationPage.classList.remove('hidden');
+            document.getElementById('realName').value = users[currentUser]?.realName || '';
+            document.getElementById('idCard').value = users[currentUser]?.idCard || '';
+        });
+        
+        submitVerification.addEventListener('click', function() {
+            let isValid = true;
+            
+            const realName = document.getElementById('realName').value;
+            const idCard = document.getElementById('idCard').value;
+            
+            document.getElementById('nameError').style.display = 'none';
+            document.getElementById('idError').style.display = 'none';
+            
+            document.getElementById('realName').classList.remove('input-error');
+            document.getElementById('idCard').classList.remove('input-error');
+            
+            if (!realName) {
+                document.getElementById('nameError').style.display = 'block';
+                document.getElementById('realName').classList.add('input-error');
+                isValid = false;
+            }
+            
+            const idRegex = /(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
+            if (!idRegex.test(idCard)) {
+                document.getElementById('idError').style.display = 'block';
+                document.getElementById('idCard').classList.add('input-error');
+                isValid = false;
+            }
+            
+            if (isValid && currentUser && users[currentUser]) {
+                users[currentUser].idVerified = true;
+                users[currentUser].realName = realName;
+                users[currentUser].idCard = idCard;
+                
+                showNotification('实名认证成功！');
+                
+                verificationPage.classList.add('hidden');
+                accountManagementPage.classList.remove('hidden');
+                updateUserInfo();
+            }
+        });
+        
+        changeAvatarBtn.addEventListener('click', function() {
+            alert('功能开发中，敬请期待');
+        });
+        
+        document.querySelectorAll('.toggle-password').forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                togglePasswordVisibility(this);
+            });
+        });
+    </script>
+</body>
+</html>
