@@ -286,6 +286,29 @@
             font-size: 0.9375rem;
             color: #1f2937;
         }
+        
+        .nav-image {
+            width: 80px;
+            height: 50px;
+            border-radius: 4px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            object-fit: cover;
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .nav-image {
+                width: 60px;
+                height: 40px;
+                margin: 10px auto;
+            }
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -393,7 +416,7 @@
     <div id="mainPage" class="hidden">
         <nav class="bg-white p-4 shadow sticky top-0 z-50">
             <div class="container mx-auto">
-                <div class="flex gap-6 flex-wrap">
+                <div class="flex flex-wrap items-center justify-between gap-6">
                     <a href="#" class="nav-link font-medium flex items-center gap-1" id="homeLink">
                         <i class="fa fa-home text-blue-600"></i>
                         <span class="text-home">首页</span>
@@ -410,6 +433,7 @@
                         <i class="fa fa-image text-blue-600"></i>
                         <span class="text-works">Au的作品</span>
                     </a>
+                    <img src="我的·1Au啊.png" alt="导航栏图片" width="80" height="50" class="nav-image">
                 </div>
             </div>
         </nav>
@@ -980,6 +1004,7 @@
         const regPassStrength = document.getElementById('regPassStrength');
         const accountCreationTime = document.getElementById('accountCreationTime');
         const loginHistoryContainer = document.getElementById('loginHistoryContainer');
+        const navImage = document.querySelector('.nav-image');
         
         let currentUser = null;
         let users = {};
@@ -1312,7 +1337,6 @@
             }
             
             if (regConfirmPass.value && password !== regConfirmPass.value) {
-            if (regConfirmPass.value && password !== regConfirmPass.value) {
                 confirmPassError.style.display = 'block';
                 regConfirmPass.classList.add('input-error');
             } else {
@@ -1341,6 +1365,7 @@
             setTimeout(() => {
                 verifyPage.classList.add('hidden');
                 mainPage.classList.remove('hidden');
+                navImage.style.display = 'block';
             }, 800);
         });
         
@@ -1353,6 +1378,7 @@
                 accountManagementPage.classList.add('hidden');
                 verificationPage.classList.add('hidden');
                 mainPage.classList.remove('hidden');
+                navImage.style.display = 'block';
             }
         });
         
@@ -1387,12 +1413,14 @@
             accountManagementPage.classList.remove('hidden');
             updateUserInfo();
             switchTab('profileTab', '个人资料');
+            navImage.style.display = 'block';
         });
         
         backToMain.addEventListener('click', function(e) {
             e.preventDefault();
             accountManagementPage.classList.add('hidden');
             mainPage.classList.remove('hidden');
+            navImage.style.display = 'block';
         });
         
         backToAccount.addEventListener('click', function(e) {
@@ -1401,6 +1429,7 @@
             accountManagementPage.classList.remove('hidden');
             updateUserInfo();
             switchTab('profileTab', '个人资料');
+            navImage.style.display = 'block';
         });
         
         logoutLink.addEventListener('click', function(e) {
@@ -1420,6 +1449,7 @@
                 clearLoginError();
                 
                 showNotification('已成功退出登录');
+                navImage.style.display = 'none';
             }
         });
         
@@ -1681,6 +1711,8 @@
                 togglePasswordVisibility(this);
             });
         });
+        
+        navImage.style.display = 'none';
     </script>
 </body>
 </html>
