@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Au的小窝</title>
+    <link rel="icon" href="我的Au啊_ba-style@nulla.top.png" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     
@@ -1310,6 +1311,7 @@
                 this.classList.remove('input-error');
             }
             
+            if (regConfirmPass.value && password !== regConfirmPass.value) {
             if (regConfirmPass.value && password !== regConfirmPass.value) {
                 confirmPassError.style.display = 'block';
                 regConfirmPass.classList.add('input-error');
