@@ -30,8 +30,15 @@
             z-index: 10;
             max-width: 250px;
             pointer-events: auto;
-            transition: transform 0.3s ease, filter 0.3s ease;
+            transition: transform 0.3s ease, filter 0.3s ease, opacity 0.5s ease, transform 0.5s ease;
             cursor: pointer;
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        
+        .character-stand.visible {
+            opacity: 1;
+            transform: translateX(0);
         }
         
         .character-stand:hover {
@@ -392,7 +399,7 @@
                     </div>
                     
                     <div class="mb-4">
-                        <label class="block mb-1 text-blue-700">邮箱</label>
+                        <label class="block mb-1 text-blue-700">邮箱（选填）</label>
                         <input type="email" id="regEmail" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
                     </div>
                     
@@ -447,6 +454,13 @@
                         <i class="fa fa-image text-blue-600"></i>
                         <span class="text-works">Au的作品</span>
                     </a>
+                    <div class="ml-auto flex items-center gap-2">
+                        <span class="text-gray-600">爱丽丝</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="characterToggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -513,6 +527,13 @@
                     <div class="container mx-auto px-4 py-4 flex justify-between items-center">
                         <h2 class="text-xl font-bold text-gray-800" id="pageTitle">个人资料</h2>
                         <div class="flex items-center gap-4">
+                            <div class="flex items-center gap-2">
+                                <span class="text-gray-600">爱丽丝</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="characterToggleAccount">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
                             <button class="md:hidden text-gray-600 btn-effect" id="mobileMenuBtn">
                                 <i class="fa fa-bars"></i>
                             </button>
@@ -791,6 +812,13 @@
                     <div class="container mx-auto px-4 py-4 flex justify-between items-center">
                         <h2 class="text-xl font-bold text-gray-800">实名认证</h2>
                         <div class="flex items-center gap-4">
+                            <div class="flex items-center gap-2">
+                                <span class="text-gray-600">爱丽丝</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="characterToggleVerification">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
                             <button class="md:hidden text-gray-600 btn-effect" id="verificationMobileMenuBtn">
                                 <i class="fa fa-bars"></i>
                             </button>
@@ -1018,6 +1046,9 @@
         const accountCreationTime = document.getElementById('accountCreationTime');
         const loginHistoryContainer = document.getElementById('loginHistoryContainer');
         const characterStand = document.getElementById('characterStand');
+        const characterToggle = document.getElementById('characterToggle');
+        const characterToggleAccount = document.getElementById('characterToggleAccount');
+        const characterToggleVerification = document.getElementById('characterToggleVerification');
         
         let currentUser = null;
         let users = {
@@ -1262,12 +1293,30 @@
         function showCharacterStand() {
             if (characterStand) {
                 characterStand.classList.remove('hidden');
+                setTimeout(() => {
+                    characterStand.classList.add('visible');
+                }, 10);
             }
         }
         
         function hideCharacterStand() {
             if (characterStand) {
-                characterStand.classList.add('hidden');
+                characterStand.classList.remove('visible');
+                setTimeout(() => {
+                    characterStand.classList.add('hidden');
+                }, 500);
+            }
+        }
+        
+        function syncCharacterToggles(state) {
+            characterToggle.checked = state;
+            characterToggleAccount.checked = state;
+            characterToggleVerification.checked = state;
+            
+            if (state) {
+                showCharacterStand();
+            } else {
+                hideCharacterStand();
             }
         }
         
@@ -1314,7 +1363,6 @@
                 loginPage.classList.add('hidden');
                 verifyPage.classList.remove('hidden');
                 resetVerificationButton();
-                showCharacterStand();
             } else {
                 loginError.style.display = 'block';
                 loginUser.classList.add('input-error');
@@ -1369,10 +1417,7 @@
                 isValid = false;
             }
             
-            if (!email) {
-                alert('请输入邮箱地址');
-                isValid = false;
-            } else {
+            if (email) {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(email)) {
                     alert('请输入有效的邮箱地址');
@@ -1443,6 +1488,7 @@
         regConfirmPass.addEventListener('input', function() {
             const confirmPassword = this.value;
             
+            
             if (confirmPassword && regPass.value !== confirmPassword) {
                 confirmPassError.style.display = 'block';
                 this.classList.add('input-error');
@@ -1460,7 +1506,6 @@
             setTimeout(() => {
                 verifyPage.classList.add('hidden');
                 mainPage.classList.remove('hidden');
-                showCharacterStand();
             }, 800);
         });
         
@@ -1473,7 +1518,6 @@
                 accountManagementPage.classList.add('hidden');
                 verificationPage.classList.add('hidden');
                 mainPage.classList.remove('hidden');
-                showCharacterStand();
             }
         });
         
@@ -1508,14 +1552,12 @@
             accountManagementPage.classList.remove('hidden');
             updateUserInfo();
             switchTab('profileTab', '个人资料');
-            showCharacterStand();
         });
         
         backToMain.addEventListener('click', function(e) {
             e.preventDefault();
             accountManagementPage.classList.add('hidden');
             mainPage.classList.remove('hidden');
-            showCharacterStand();
         });
         
         backToAccount.addEventListener('click', function(e) {
@@ -1524,7 +1566,6 @@
             accountManagementPage.classList.remove('hidden');
             updateUserInfo();
             switchTab('profileTab', '个人资料');
-            showCharacterStand();
         });
         
         logoutLink.addEventListener('click', function(e) {
@@ -1542,9 +1583,9 @@
                 loginUser.value = '';
                 loginPass.value = '';
                 clearLoginError();
+                syncCharacterToggles(false);
                 
                 showNotification('已成功退出登录');
-                hideCharacterStand();
             }
         });
         
@@ -1757,7 +1798,6 @@
             verificationPage.classList.remove('hidden');
             document.getElementById('realName').value = users[currentUser]?.realName || '';
             document.getElementById('idCard').value = users[currentUser]?.idCard || '';
-            showCharacterStand();
         });
         
         submitVerification.addEventListener('click', function() {
@@ -1795,7 +1835,6 @@
                 verificationPage.classList.add('hidden');
                 accountManagementPage.classList.remove('hidden');
                 updateUserInfo();
-                showCharacterStand();
             }
         });
         
@@ -1807,6 +1846,18 @@
             toggle.addEventListener('click', function() {
                 togglePasswordVisibility(this);
             });
+        });
+        
+        characterToggle.addEventListener('change', function() {
+            syncCharacterToggles(this.checked);
+        });
+        
+        characterToggleAccount.addEventListener('change', function() {
+            syncCharacterToggles(this.checked);
+        });
+        
+        characterToggleVerification.addEventListener('change', function() {
+            syncCharacterToggles(this.checked);
         });
         
         if (characterStand) {
