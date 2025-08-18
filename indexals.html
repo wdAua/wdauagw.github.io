@@ -276,7 +276,7 @@
       </div>
     </div>
     <div class="character-art">
-      <img src="青海.png" alt="爱丽丝立绘" width="1024" class="art-img" id="characterImg" onerror="this.src='https://via.placeholder.com/600x1000';this.alt='角色立绘'">
+      <img src="爱丽丝立绘.png" alt="爱丽丝立绘" width="650" class="art-img" id="characterImg" onerror="this.src='https://via.placeholder.com/600x1000';this.alt='角色立绘'">
     </div>
   </div>
   <script>
@@ -326,7 +326,7 @@
         name: "青海",
         header: "青海对话",
         avatar: "青海.png",
-        art: "https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/841e1cf84a0840c1a54528a3883c3e79.png~tplv-a9rns2rl98-24:720:720.png?rk3s=1fb89129&x-expires=1756047173&x-signature=C5rBp6aGaINYgSN1gXEwuy6p2tw%3D",
+        art: "青海.png",
         initialMsg: "你好，我是青海>ᴗ<",
         replyMap: [
           { keywords: ['兴趣', '爱好'], reply: '我的爱好是3D建模 你的呢⌯\'▾\'⌯' },
@@ -359,15 +359,12 @@
 
     function switchRole(roleName) {
       currentRole = roles[roleName];
-      
       aliceBtn.classList.remove('active');
       qinghaiBtn.classList.remove('active');
       document.getElementById(roleName + 'Btn').classList.add('active');
-      
       chatHeader.innerHTML = `<img src="${currentRole.avatar}" class="header-avatar" alt="${currentRole.name}头像">${currentRole.header}`;
       characterImg.src = currentRole.art;
       characterImg.onerror = function() { this.src = 'https://via.placeholder.com/600x1000'; this.alt = '角色立绘'; };
-      
       addInitialMessage();
     }
 
@@ -383,26 +380,20 @@
     function sendMsg() {
       const msg = userInput.value.trim();
       if (!msg) return;
-
       const userDiv = document.createElement('div');
       userDiv.className = 'user-msg message';
       userDiv.textContent = msg;
       chatMsgs.appendChild(userDiv);
-      
       userInput.value = '';
       chatMsgs.scrollTop = chatMsgs.scrollHeight;
-
       showTyping();
-
       setTimeout(() => {
         removeTyping();
         const reply = getReply(msg);
-         
         const aiDiv = document.createElement('div');
         aiDiv.className = 'ai-msg message';
         aiDiv.innerHTML = `<img src="${currentRole.avatar}" class="ai-avatar" alt="${currentRole.name}头像"><div class="msg-content">${reply}</div>`;
         chatMsgs.appendChild(aiDiv);
-        
         currentRole.lastReply = reply;
         chatMsgs.scrollTop = chatMsgs.scrollHeight;
       }, 800);
@@ -411,16 +402,13 @@
     function getReply(msg) {
       const lowerMsg = msg.toLowerCase();
       const calcRes = calcExpr(lowerMsg);
-      
       if (calcRes !== null) {
         return currentRole.calcReplyFormat.replace('{result}', calcRes);
       }
-
       if (currentRole.name === '青海') {
         if (currentRole.lastReply === '我的爱好是3D建模 你的呢⌯\'▾\'⌯') {
           return currentRole.specialReplies['我的爱好是3D建模 你的呢⌯\'▾\'⌯'](msg);
         }
-        
         if (currentRole.lastReply && currentRole.lastReply.startsWith('现在是') && currentRole.lastReply.includes('你要干嘛呢')) {
           return currentRole.specialReplies.timeReply(msg);
         }
@@ -429,7 +417,6 @@
           return `${msg}吗，喔 听起来很好玩 爱丽丝想要一起玩`;
         }
       }
-
       const matched = [];
       currentRole.replyMap.forEach(item => {
         if (item.keywords.some(k => lowerMsg.includes(k.toLowerCase()))) {
@@ -437,7 +424,6 @@
           matched.push(reply);
         }
       });
-
       return matched.length 
         ? matched[Math.floor(Math.random() * matched.length)] 
         : currentRole.defaultReplies[Math.floor(Math.random() * currentRole.defaultReplies.length)];
@@ -446,7 +432,6 @@
     function calcExpr(msg) {
       const expr = msg.replace(/[^0-9+\-*/().]/g, '');
       if (!expr) return null;
-      
       try {
         if (/^[\d+\-*/().]+$/.test(expr)) {
           const result = new Function(`return ${expr};`)();
@@ -478,13 +463,11 @@
 
     function bindEvents() {
       sendBtn.addEventListener('click', sendMsg);
-      
       userInput.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
           sendMsg();
         }
       });
-
       aliceBtn.addEventListener('click', () => switchRole('alice'));
       qinghaiBtn.addEventListener('click', () => switchRole('qinghai'));
     }
