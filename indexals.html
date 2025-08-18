@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>爱丽丝对话AI</title>
+  <title>对话AI</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
   <style>
@@ -223,14 +223,44 @@
       background: #FF1493;
       transform: scale(1.05);
     }
+    .role-switch {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+    }
+    .role-btn {
+      padding: 8px 15px;
+      background: #FF69B4;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(255, 105, 180, 0.3);
+    }
+    .role-btn:hover {
+      background: #FF1493;
+      transform: translateY(-2px);
+    }
+    .role-btn.active {
+      background: #C056D3;
+      box-shadow: 0 4px 8px rgba(192, 86, 211, 0.4);
+    }
   </style>
 </head>
 <body>
   <a href="index.html" class="exit-btn">退出</a>
   
+  <div class="role-switch">
+    <button class="role-btn active" id="aliceBtn">爱丽丝</button>
+    <button class="role-btn" id="qinghaiBtn">青海</button>
+  </div>
+  
   <div class="container">
     <div class="chat-box">
-      <div class="chat-header">
+      <div class="chat-header" id="chatHeader">
         <img src="爱丽丝背景.png" class="header-avatar" alt="爱丽丝头像">
         爱丽丝对话
       </div>
@@ -246,49 +276,109 @@
       </div>
     </div>
     <div class="character-art">
-      <img src="爱丽丝立绘.png" alt="爱丽丝立绘" width="650" class="art-img" onerror="this.src='https://via.placeholder.com/600*1000';this.alt='角色立绘'">
+      <img src="爱丽丝立绘.png" alt="爱丽丝立绘" width="650" class="art-img" id="characterImg" onerror="this.src='https://via.placeholder.com/600x1000';this.alt='角色立绘'">
     </div>
   </div>
   <script>
-    const replyMap = [
-      { keywords: ['你是谁', '叫什么', '姓名'], reply: '邦邦卡邦，我是爱丽丝呀o(^▽^)o' },
-      { keywords: ['老师'], reply: '老师很好呢' },
-      { keywords: ['游戏开发部'], reply: '我很喜欢游戏开发部呢' },
-      { keywords: ['桃'], reply: '小桃是个很好的人呢，我很喜欢她' },
-      { keywords: ['绿'], reply: '小绿很爱画画，我很喜欢她' },
-      { keywords: ['游戏', '给木'], reply: '我很喜欢玩游戏呢ヾ(＠^∇^＠)ノ' },
-      { keywords: ['柚子'], reply: '柚子姐姐也很好呢，咦 难道柚子又躲在柜子里面去了' },
-      { keywords: ['优香', '妈妈'], reply: '优香很好，我好喜欢她' },
-      { keywords: ['日奈'], reply: '喔，好久都没有见到日奈了' },
-      { keywords: ['喜欢'], reply: '我喜欢玩游戏，emmm.........其实......还有老师呀（〜^∇^)〜' },
-      { keywords: ['爱丽丝'], reply: '咦，老师叫我干什么呢' },
-      { keywords: ['游戏机'], reply: '爱丽丝的游戏机呢......唔...让我找一下.....找到了！' },
-      { keywords: ['一起玩'], reply: '好的，邦邦卡邦，老师 爱丽丝准备好了' },
-      { keywords: ['你好', 'hi'], reply: '你好啊老师，很高兴见到你' },
-      { keywords: ['傻瓜', '智障', '傻逼', 'sz', '你妈', '操'], reply: '额.....老师...对不起，可能是我惹到您了....╥﹏╥' },
-      { keywords: ['喜欢什么游戏'], reply: '爱丽丝喜欢很多游戏呢，尤其是游戏开发部开发出的，老师喜欢什么游戏呢（＾ｖ＾）' },
-      { keywords: ['开始'], reply: '好的，邦邦卡邦，勇者准备好了' },
-      { keywords: ['基沃托斯'], reply: '爱丽丝觉得....唔....基沃托斯很美好呢，爱丽丝很喜欢(≧∇≦)/' },
-      { keywords: ['key'], reply: 'key是个很好的人呢' },
-      { keywords: ['我的Au啊'], reply: '这是很帅气的人，爱丽丝超级喜欢他！Ｏ(≧∇≦)Ｏ' }
-    ];
-    
-    const defaultReplies = [
-      '喔 爱丽丝还没有进化 不知道怎么回答',
-      '呜呜呜 我死机了',
-      '唉 我也不知道诶',
-      '求求老师不要为难我了(Ｔ▽Ｔ)',
-      '唔，让我想想....额，不知道',
-      'awa',
-      '（／．＼）唔，游戏...嘿嘿嘿...ZZZ～',
-      '！？'
-    ];
-    
-    let lastAiReply = '';
+    const roles = {
+      alice: {
+        name: "爱丽丝",
+        header: "爱丽丝对话",
+        avatar: "爱丽丝背景.png",
+        art: "爱丽丝立绘.png",
+        initialMsg: "邦邦卡邦 爱丽丝来帮忙了",
+        replyMap: [
+          { keywords: ['你是谁', '叫什么', '姓名'], reply: '邦邦卡邦，我是爱丽丝呀o(^▽^)o' },
+          { keywords: ['老师'], reply: '老师很好呢' },
+          { keywords: ['游戏开发部'], reply: '我很喜欢游戏开发部呢' },
+          { keywords: ['桃'], reply: '小桃是个很好的人呢，我很喜欢她' },
+          { keywords: ['绿'], reply: '小绿很爱画画，我很喜欢她' },
+          { keywords: ['游戏', '给木'], reply: '我很喜欢玩游戏呢ヾ(＠^∇^＠)ノ' },
+          { keywords: ['柚子'], reply: '柚子姐姐也很好呢，咦 难道柚子又躲在柜子里面去了' },
+          { keywords: ['优香', '妈妈'], reply: '优香很好，我好喜欢她' },
+          { keywords: ['日奈'], reply: '喔，好久都没有见到日奈了' },
+          { keywords: ['喜欢'], reply: '我喜欢玩游戏，emmm.........其实......还有老师呀（〜^∇^)〜' },
+          { keywords: ['爱丽丝'], reply: '咦，老师叫我干什么呢' },
+          { keywords: ['游戏机'], reply: '爱丽丝的游戏机呢......唔...让我找一下.....找到了！' },
+          { keywords: ['一起玩'], reply: '好的，邦邦卡邦，老师 爱丽丝准备好了' },
+          { keywords: ['你好', 'hi'], reply: '你好啊老师，很高兴见到你' },
+          { keywords: ['傻瓜', '智障', '傻逼', 'sz', '你妈', '操'], reply: '额.....老师...对不起，可能是我惹到您了....╥﹏╥' },
+          { keywords: ['喜欢什么游戏'], reply: '爱丽丝喜欢很多游戏呢，尤其是游戏开发部开发出的，老师喜欢什么游戏呢（＾ｖ＾）' },
+          { keywords: ['开始'], reply: '好的，邦邦卡邦，勇者准备好了' },
+          { keywords: ['基沃托斯'], reply: '爱丽丝觉得....唔....基沃托斯很美好呢，爱丽丝很喜欢(≧∇≦)/' },
+          { keywords: ['key'], reply: 'key是个很好的人呢' },
+          { keywords: ['我的Au啊'], reply: '这是很帅气的人，爱丽丝超级喜欢他！Ｏ(≧∇≦)Ｏ' }
+        ],
+        defaultReplies: [
+          '喔 爱丽丝还没有进化 不知道怎么回答',
+          '呜呜呜 我死机了',
+          '唉 我也不知道诶',
+          '求求老师不要为难我了(Ｔ▽Ｔ)',
+          '唔，让我想想....额，不知道',
+          'awa',
+          '（／．＼）唔，游戏...嘿嘿嘿...ZZZ～',
+          '！？'
+        ],
+        calcReplyFormat: "好的老师，我来算算 算出来了 结果是{result}",
+        lastReply: ""
+      },
+      qinghai: {
+        name: "青海",
+        header: "青海对话",
+        avatar: "青海.png",
+        art: "https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/841e1cf84a0840c1a54528a3883c3e79.png~tplv-a9rns2rl98-24:720:720.png?rk3s=1fb89129&x-expires=1756047173&x-signature=C5rBp6aGaINYgSN1gXEwuy6p2tw%3D",
+        initialMsg: "你好，我是青海>ᴗ<",
+        replyMap: [
+          { keywords: ['兴趣', '爱好'], reply: '我的爱好是3D建模 你的呢⌯\'▾\'⌯' },
+          { keywords: ['你好吗'], reply: '嗯我很好的 谢谢' },
+          { keywords: ['3D建模'], reply: '嘿嘿 这方面我很厉害的哦 ˃̵ ֊˂̵ ' },
+          { keywords: ['傻子', '傻逼', '智障', '操', '艹', '神经病', '贱', '笨'], reply: '呜呜呜 是我做错了吗对不起˃ ⌑ ˂' },
+          { keywords: ['喜欢什么'], reply: '我喜欢3D建模 当然 其实.......还有你啦' },
+          { keywords: ['叫什么', '名字'], reply: '我是青海•ᴗ•' },
+          { keywords: ['哪来的'], reply: '我是想象里面的哦' },
+          { keywords: ['时间'], reply: function() { return `现在是${new Date().toLocaleString()}你要干嘛呢`; } }
+        ],
+        defaultReplies: ['wuwuwu', '我不知道', 'e', '别为难我了', '哎'],
+        calcReplyFormat: "让我算算 嗯 算出来了 是{result}",
+        lastReply: "",
+        specialReplies: {
+          '我的爱好是3D建模 你的呢⌯\'▾\'⌯': function(nextMsg) { return `${nextMsg}吗 听起来很不错`; },
+          timeReply: function(nextMsg) { return `${nextMsg}吗，wu`; }
+        }
+      }
+    };
+
+    let currentRole = roles.alice;
     const chatMsgs = document.getElementById('chatMsgs');
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
-    const aiAvatarSrc = '爱丽丝背景.png';
+    const chatHeader = document.getElementById('chatHeader');
+    const characterImg = document.getElementById('characterImg');
+    const aliceBtn = document.getElementById('aliceBtn');
+    const qinghaiBtn = document.getElementById('qinghaiBtn');
+
+    function switchRole(roleName) {
+      currentRole = roles[roleName];
+      
+      aliceBtn.classList.remove('active');
+      qinghaiBtn.classList.remove('active');
+      document.getElementById(roleName + 'Btn').classList.add('active');
+      
+      chatHeader.innerHTML = `<img src="${currentRole.avatar}" class="header-avatar" alt="${currentRole.name}头像">${currentRole.header}`;
+      characterImg.src = currentRole.art;
+      characterImg.onerror = function() { this.src = 'https://via.placeholder.com/600x1000'; this.alt = '角色立绘'; };
+      
+      addInitialMessage();
+    }
+
+    function addInitialMessage() {
+      const initialDiv = document.createElement('div');
+      initialDiv.className = 'ai-msg message';
+      initialDiv.innerHTML = `<img src="${currentRole.avatar}" class="ai-avatar" alt="${currentRole.name}头像"><div class="msg-content">${currentRole.initialMsg}</div>`;
+      chatMsgs.appendChild(initialDiv);
+      chatMsgs.scrollTop = chatMsgs.scrollHeight;
+      currentRole.lastReply = currentRole.initialMsg;
+    }
 
     function sendMsg() {
       const msg = userInput.value.trim();
@@ -310,10 +400,10 @@
          
         const aiDiv = document.createElement('div');
         aiDiv.className = 'ai-msg message';
-        aiDiv.innerHTML = `<img src="${aiAvatarSrc}" class="ai-avatar" alt="爱丽丝背景"><div class="msg-content">${reply}</div>`;
+        aiDiv.innerHTML = `<img src="${currentRole.avatar}" class="ai-avatar" alt="${currentRole.name}头像"><div class="msg-content">${reply}</div>`;
         chatMsgs.appendChild(aiDiv);
         
-        lastAiReply = reply;
+        currentRole.lastReply = reply;
         chatMsgs.scrollTop = chatMsgs.scrollHeight;
       }, 800);
     }
@@ -323,23 +413,34 @@
       const calcRes = calcExpr(lowerMsg);
       
       if (calcRes !== null) {
-        return `好的老师，我来算算 算出来了 结果是${calcRes}`;
+        return currentRole.calcReplyFormat.replace('{result}', calcRes);
       }
 
-      if (lastAiReply === '爱丽丝喜欢很多游戏呢，尤其是游戏开发部开发出的，老师喜欢什么游戏呢（＾ｖ＾）') {
-        return `${msg}吗，喔 听起来很好玩 爱丽丝想要一起玩`;
+      if (currentRole.name === '青海') {
+        if (currentRole.lastReply === '我的爱好是3D建模 你的呢⌯\'▾\'⌯') {
+          return currentRole.specialReplies['我的爱好是3D建模 你的呢⌯\'▾\'⌯'](msg);
+        }
+        
+        if (currentRole.lastReply && currentRole.lastReply.startsWith('现在是') && currentRole.lastReply.includes('你要干嘛呢')) {
+          return currentRole.specialReplies.timeReply(msg);
+        }
+      } else {
+        if (currentRole.lastReply === '爱丽丝喜欢很多游戏呢，尤其是游戏开发部开发出的，老师喜欢什么游戏呢（＾ｖ＾）') {
+          return `${msg}吗，喔 听起来很好玩 爱丽丝想要一起玩`;
+        }
       }
 
       const matched = [];
-      replyMap.forEach(item => {
+      currentRole.replyMap.forEach(item => {
         if (item.keywords.some(k => lowerMsg.includes(k.toLowerCase()))) {
-          matched.push(item.reply);
+          let reply = typeof item.reply === 'function' ? item.reply() : item.reply;
+          matched.push(reply);
         }
       });
 
       return matched.length 
         ? matched[Math.floor(Math.random() * matched.length)] 
-        : defaultReplies[Math.floor(Math.random() * defaultReplies.length)];
+        : currentRole.defaultReplies[Math.floor(Math.random() * currentRole.defaultReplies.length)];
     }
 
     function calcExpr(msg) {
@@ -363,7 +464,7 @@
       const typingDiv = document.createElement('div');
       typingDiv.className = 'typing';
       typingDiv.id = 'typingIndicator';
-      typingDiv.innerHTML = `<img src="${aiAvatarSrc}" class="typing-avatar" alt="爱丽丝背景"><div class="typing-dots"><span></span><span></span><span></span></div>`;
+      typingDiv.innerHTML = `<img src="${currentRole.avatar}" class="typing-avatar" alt="${currentRole.name}头像"><div class="typing-dots"><span></span><span></span><span></span></div>`;
       chatMsgs.appendChild(typingDiv);
       chatMsgs.scrollTop = chatMsgs.scrollHeight;
     }
@@ -383,11 +484,15 @@
           sendMsg();
         }
       });
+
+      aliceBtn.addEventListener('click', () => switchRole('alice'));
+      qinghaiBtn.addEventListener('click', () => switchRole('qinghai'));
     }
 
     window.addEventListener('load', function() {
       bindEvents();
+      currentRole.lastReply = roles.alice.initialMsg;
     });
   </script>
-</body>
+</body>  
 </html>
