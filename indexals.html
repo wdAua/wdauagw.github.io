@@ -229,6 +229,7 @@
       right: 20px;
       display: flex;
       gap: 10px;
+      flex-wrap: wrap;
     }
     .role-btn {
       padding: 8px 15px;
@@ -256,6 +257,7 @@
   <div class="role-switch">
     <button class="role-btn active" id="aliceBtn">爱丽丝</button>
     <button class="role-btn" id="qinghaiBtn">青海</button>
+    <button class="role-btn" id="lilinaBtn">莉莉娜</button>
   </div>
   
   <div class="container">
@@ -276,7 +278,7 @@
       </div>
     </div>
     <div class="character-art">
-      <img src="爱丽丝立绘.png" alt="爱丽丝立绘" width="650" class="art-img" id="characterImg" onerror="this.src='https://via.placeholder.com/600x1000';this.alt='角色立绘'">
+      <img src="爱丽丝立绘.png" alt="爱丽丝立绘" class="art-img" id="characterImg" onerror="this.src='https://via.placeholder.com/600x1000';this.alt='角色立绘'">
     </div>
   </div>
   <script>
@@ -326,7 +328,7 @@
         name: "青海",
         header: "青海对话",
         avatar: "青海.png",
-        art: "青海.png",
+        art: "https://picsum.photos/id/237/600/1000",
         initialMsg: "你好，我是青海>ᴗ<",
         replyMap: [
           { keywords: ['兴趣', '爱好'], reply: '我的爱好是3D建模 你的呢⌯\'▾\'⌯' },
@@ -345,137 +347,162 @@
           '我的爱好是3D建模 你的呢⌯\'▾\'⌯': function(nextMsg) { return `${nextMsg}吗 听起来很不错`; },
           timeReply: function(nextMsg) { return `${nextMsg}吗，wu`; }
         }
+      },
+      lilina: {
+        name: "莉莉娜",
+        header: "莉莉娜对话",
+        avatar: "莉莉娜.png",
+        art: "https://picsum.photos/id/64/600/1000",
+        initialMsg: "你好呀，我是莉莉娜~",
+        replyMap: [
+          { keywords: ['你好', '嗨'], reply: '你好呀！有什么可以帮你的吗？' },
+          { keywords: ['名字', '叫什么'], reply: '我叫莉莉娜哦~' }
+        ],
+        defaultReplies: ['嗯呢', '我不知道呢', '哈哈', '你说什么呀'],
+        calcReplyFormat: "计算结果是{result}哦~",
+        lastReply: ""
       }
     };
-
-    let currentRole = roles.alice;
+    
+    let currentRole = 'alice';
     const chatMsgs = document.getElementById('chatMsgs');
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
     const chatHeader = document.getElementById('chatHeader');
     const characterImg = document.getElementById('characterImg');
-    const aliceBtn = document.getElementById('aliceBtn');
-    const qinghaiBtn = document.getElementById('qinghaiBtn');
-
-    function switchRole(roleName) {
-      currentRole = roles[roleName];
-      aliceBtn.classList.remove('active');
-      qinghaiBtn.classList.remove('active');
-      document.getElementById(roleName + 'Btn').classList.add('active');
-      chatHeader.innerHTML = `<img src="${currentRole.avatar}" class="header-avatar" alt="${currentRole.name}头像">${currentRole.header}`;
-      characterImg.src = currentRole.art;
-      characterImg.onerror = function() { this.src = 'https://via.placeholder.com/600x1000'; this.alt = '角色立绘'; };
-      addInitialMessage();
-    }
-
-    function addInitialMessage() {
-      const initialDiv = document.createElement('div');
-      initialDiv.className = 'ai-msg message';
-      initialDiv.innerHTML = `<img src="${currentRole.avatar}" class="ai-avatar" alt="${currentRole.name}头像"><div class="msg-content">${currentRole.initialMsg}</div>`;
-      chatMsgs.appendChild(initialDiv);
-      chatMsgs.scrollTop = chatMsgs.scrollHeight;
-      currentRole.lastReply = currentRole.initialMsg;
-    }
-
-    function sendMsg() {
-      const msg = userInput.value.trim();
-      if (!msg) return;
-      const userDiv = document.createElement('div');
-      userDiv.className = 'user-msg message';
-      userDiv.textContent = msg;
-      chatMsgs.appendChild(userDiv);
-      userInput.value = '';
-      chatMsgs.scrollTop = chatMsgs.scrollHeight;
-      showTyping();
-      setTimeout(() => {
-        removeTyping();
-        const reply = getReply(msg);
-        const aiDiv = document.createElement('div');
-        aiDiv.className = 'ai-msg message';
-        aiDiv.innerHTML = `<img src="${currentRole.avatar}" class="ai-avatar" alt="${currentRole.name}头像"><div class="msg-content">${reply}</div>`;
-        chatMsgs.appendChild(aiDiv);
-        currentRole.lastReply = reply;
-        chatMsgs.scrollTop = chatMsgs.scrollHeight;
-      }, 800);
-    }
-	  
-    function getReply(msg) {
-      const lowerMsg = msg.toLowerCase();
-      const calcRes = calcExpr(lowerMsg);
-      if (calcRes !== null) {
-        return currentRole.calcReplyFormat.replace('{result}', calcRes);
-      }
-      if (currentRole.name === '青海') {
-        if (currentRole.lastReply === '我的爱好是3D建模 你的呢⌯\'▾\'⌯') {
-          return currentRole.specialReplies['我的爱好是3D建模 你的呢⌯\'▾\'⌯'](msg);
-        }
-        if (currentRole.lastReply && currentRole.lastReply.startsWith('现在是') && currentRole.lastReply.includes('你要干嘛呢')) {
-          return currentRole.specialReplies.timeReply(msg);
-        }
-      } else {
-        if (currentRole.lastReply === '爱丽丝喜欢很多游戏呢，尤其是游戏开发部开发出的，老师喜欢什么游戏呢（＾ｖ＾）') {
-          return `${msg}吗，喔 听起来很好玩 爱丽丝想要一起玩`;
-        }
-      }
-      const matched = [];
-      currentRole.replyMap.forEach(item => {
-        if (item.keywords.some(k => lowerMsg.includes(k.toLowerCase()))) {
-          let reply = typeof item.reply === 'function' ? item.reply() : item.reply;
-          matched.push(reply);
-        }
+    const roleBtns = document.querySelectorAll('.role-btn');
+    
+    roleBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        roleBtns.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        
+        const roleId = this.id.replace('Btn', '');
+        currentRole = roleId;
+        const role = roles[roleId];
+        
+        updateChatUI(role);
+        
+        chatMsgs.innerHTML = '';
+        addMessage('ai', role.initialMsg, role.avatar);
       });
-      return matched.length 
-        ? matched[Math.floor(Math.random() * matched.length)] 
-        : currentRole.defaultReplies[Math.floor(Math.random() * currentRole.defaultReplies.length)];
+    });
+    
+    function updateChatUI(role) {
+      chatHeader.innerHTML = `
+        <img src="${role.avatar}" class="header-avatar" alt="${role.name}头像">
+        ${role.header}
+      `;
+      
+      characterImg.src = role.art;
+      characterImg.alt = `${role.name}立绘`;
     }
-
-    function calcExpr(msg) {
-      const expr = msg.replace(/[^0-9+\-*/().]/g, '');
-      if (!expr) return null;
-      try {
-        if (/^[\d+\-*/().]+$/.test(expr)) {
-          const result = new Function(`return ${expr};`)();
-          if (typeof result === 'number' && !isNaN(result) && Math.abs(result) < 1e18) {
-            return result;
-          }
-        }
-      } catch (e) {
-        return null;
+    
+    function addMessage(sender, text, avatar = '') {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `${sender}-msg message`;
+      
+      if (sender === 'ai') {
+        msgDiv.innerHTML = `
+          <img src="${avatar}" class="ai-avatar" alt="${roles[currentRole].name}头像">
+          <div class="msg-content">${text}</div>
+        `;
+      } else {
+        msgDiv.textContent = text;
       }
-      return null;
+      
+      chatMsgs.appendChild(msgDiv);
+      chatMsgs.scrollTop = chatMsgs.scrollHeight;
     }
-
+    
     function showTyping() {
       const typingDiv = document.createElement('div');
       typingDiv.className = 'typing';
       typingDiv.id = 'typingIndicator';
-      typingDiv.innerHTML = `<img src="${currentRole.avatar}" class="typing-avatar" alt="${currentRole.name}头像"><div class="typing-dots"><span></span><span></span><span></span></div>`;
+      typingDiv.innerHTML = `
+        <img src="${roles[currentRole].avatar}" class="typing-avatar" alt="${roles[currentRole].name}头像">
+        <div class="typing-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      `;
+      
       chatMsgs.appendChild(typingDiv);
       chatMsgs.scrollTop = chatMsgs.scrollHeight;
     }
-
-    function removeTyping() {
+    
+    function hideTyping() {
       const typingDiv = document.getElementById('typingIndicator');
       if (typingDiv) {
-        chatMsgs.removeChild(typingDiv);
+        typingDiv.remove();
       }
     }
-
-    function bindEvents() {
-      sendBtn.addEventListener('click', sendMsg);
-      userInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-          sendMsg();
+    
+    function getAIReply(message) {
+      const role = roles[currentRole];
+      
+      if (message.startsWith('计算') || message.startsWith('算')) {
+        const expr = message.replace(/^计算|算/, '').trim();
+        try {
+          const result = math.evaluate(expr);
+          return role.calcReplyFormat.replace('{result}', result);
+        } catch (e) {
+          return "抱歉，我没看懂这个计算呢";
         }
-      });
-      aliceBtn.addEventListener('click', () => switchRole('alice'));
-      qinghaiBtn.addEventListener('click', () => switchRole('qinghai'));
+      }
+      
+      for (const item of role.replyMap) {
+        for (const keyword of item.keywords) {
+          if (message.includes(keyword)) {
+            if (typeof item.reply === 'function') {
+              return item.reply();
+            } else {
+              return item.reply;
+            }
+          }
+        }
+      }
+      
+      if (role.specialReplies && role.lastReply in role.specialReplies) {
+        const reply = role.specialReplies[role.lastReply](message);
+        role.lastReply = reply;
+        return reply;
+      }
+      
+      const randomIndex = Math.floor(Math.random() * role.defaultReplies.length);
+      const reply = role.defaultReplies[randomIndex];
+      role.lastReply = reply;
+      return reply;
     }
-
-    window.addEventListener('load', function() {
-      bindEvents();
-      currentRole.lastReply = roles.alice.initialMsg;
+    
+    function sendMessage() {
+      const message = userInput.value.trim();
+      if (!message) return;
+      
+      addMessage('user', message);
+      userInput.value = '';
+      
+      showTyping();
+      
+      setTimeout(() => {
+        hideTyping();
+        
+        const reply = getAIReply(message);
+        addMessage('ai', reply, roles[currentRole].avatar);
+      }, 800 + Math.random() * 1200);
+    }
+    
+    sendBtn.addEventListener('click', sendMessage);
+    userInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
     });
+    
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjs@11.7.0/lib/browser/math.min.js';
+    document.head.appendChild(script);
   </script>
-</body>  
+</body>
 </html>
