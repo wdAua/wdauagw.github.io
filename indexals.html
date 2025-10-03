@@ -328,7 +328,7 @@
         name: "青海",
         header: "青海对话",
         avatar: "青海.png",
-        art: "青海立绘.png",
+        art: "青海.png",
         initialMsg: "你好，我是青海>ᴗ<",
         replyMap: [
           { keywords: ['兴趣', '爱好'], reply: '我的爱好是3D建模 你的呢⌯\'▾\'⌯' },
@@ -352,7 +352,7 @@
         name: "莉莉娜",
         header: "莉莉娜对话",
         avatar: "莉莉娜.png",
-        art: "莉莉娜立绘.png",
+        art: "莉莉娜.png",
         initialMsg: "你好呀，我是莉莉娜~",
         replyMap: [
           { keywords: ['你好', '嗨'], reply: '你好呀！有什么可以帮你的吗？' },
@@ -381,22 +381,18 @@
         currentRole = roleId;
         const role = roles[roleId];
         
-        updateChatUI(role);
+        chatHeader.innerHTML = `
+          <img src="${role.avatar}" class="header-avatar" alt="${role.name}头像">
+          ${role.header}
+        `;
+        
+        characterImg.src = role.art;
+        characterImg.alt = `${role.name}立绘`;
         
         chatMsgs.innerHTML = '';
         addMessage('ai', role.initialMsg, role.avatar);
       });
     });
-    
-    function updateChatUI(role) {
-      chatHeader.innerHTML = `
-        <img src="${role.avatar}" class="header-avatar" alt="${role.name}头像">
-        ${role.header}
-      `;
-      
-      characterImg.src = role.art;
-      characterImg.alt = `${role.name}立绘`;
-    }
     
     function addMessage(sender, text, avatar = '') {
       const msgDiv = document.createElement('div');
