@@ -9,7 +9,6 @@
     
     <style>
         body {
-            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
             background-attachment: fixed;
             overflow-x: hidden;
         }
@@ -194,29 +193,8 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        #loginPage {
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-        }
-        
-        #verifyPage {
-            background: linear-gradient(135deg, #e0f2fe 0%, #bfdbfe 100%);
-        }
-        
-        #mainPage {
-            background: linear-gradient(180deg, rgba(224, 242, 254, 0.9) 0%, rgba(219, 234, 254, 0.9) 100%);
-            background-attachment: fixed;
-        }
-        
-        #accountManagementPage {
-            background-color: #eff6ff;
-            background-image: radial-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-        
-        #verificationPage {
-            background-color: #eff6ff;
-            background-image: radial-gradient(rgba(59, 130, 246, 0.08) 1px, transparent 1px);
-            background-size: 30px 30px;
+        #loginPage, #verifyPage, #mainPage, #accountManagementPage, #verificationPage {
+            background: transparent;
         }
         
         .card-hover {
@@ -338,7 +316,7 @@
     <div id="loginPage" class="min-h-screen flex items-center justify-center p-4">
         <div class="max-w-md w-full page-transition">
             <div class="text-center mb-6">
-                <h1 class="text-2xl font-bold text-blue-800">Au的小窝</h1>
+                <h1 class="text-2xl font-bold text-white">Au的小窝</h1>
                 <img src="爱丽丝想玩电脑_1_我的Au啊_.jpg" alt="Au的小窝登录封面" width="146" class="w-32 h-32 mx-auto rounded-full my-4 object-cover border-4 border-blue-100 shadow-md img-fade-in" onload="this.classList.add('loaded')">
             </div>
             
@@ -1067,7 +1045,9 @@
             }
         };
         
-        let circles = [];
+        // 梦幻主题背景
+        let particles = [];
+        let glowPoints = [];
         const canvas = document.getElementById('dynamic-bg');
         const ctx = canvas.getContext('2d');
         
@@ -1076,43 +1056,161 @@
             canvas.height = window.innerHeight;
         }
         
-        function createCircle() {
+        // 创建闪烁粒子
+        function createParticle() {
+            const colors = [
+                'rgba(255, 221, 255, 0.8)',  // 淡粉色
+                'rgba(221, 255, 255, 0.7)',  // 淡青色
+                'rgba(221, 221, 255, 0.8)',  // 淡紫色
+                'rgba(255, 240, 245, 0.7)',  // 浅粉色
+                'rgba(240, 248, 255, 0.9)'   // 淡蓝色
+            ];
+            
             return {
                 x: Math.random() * canvas.width,
-                y: canvas.height + Math.random() * 100,
-                radius: 2 + Math.random() * 8,
-                color: `rgba(96, 165, 250, ${0.1 + Math.random() * 0.2})`,
-                speed: 0.5 + Math.random() * 2
+                y: Math.random() * canvas.height,
+                radius: 1 + Math.random() * 4,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                speedX: (Math.random() - 0.5) * 0.5,
+                speedY: (Math.random() - 0.5) * 0.5,
+                alpha: Math.random() * 0.6 + 0.2,
+                pulse: Math.random() * Math.PI * 2,
+                update: function() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    this.pulse += 0.02;
+                    this.alpha = 0.2 + Math.sin(this.pulse) * 0.4;
+                    
+                    // 边界检测
+                    if (this.x < 0) this.x = canvas.width;
+                    if (this.x > canvas.width) this.x = 0;
+                    if (this.y < 0) this.y = canvas.height;
+                    if (this.y > canvas.height) this.y = 0;
+                },
+                draw: function() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color.replace('0.8', this.alpha);
+                    ctx.fill();
+                    
+                    // 光晕效果
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius * 2, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color.replace('0.8', this.alpha * 0.2);
+                    ctx.fill();
+                }
             };
         }
         
-        function animateCircles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // 创建光晕点
+        function createGlowPoint() {
+            const colors = [
+                'rgba(200, 150, 255, 0.3)',  // 粉紫色光晕
+                'rgba(150, 200, 255, 0.3)',  // 蓝紫色光晕
+                'rgba(255, 180, 220, 0.3)'   // 粉色光晕
+            ];
             
-            if (circles.length < 30) {
-                circles.push(createCircle());
-            }
-            
-            circles.forEach((circle, index) => {
-                circle.y -= circle.speed;
-                
-                ctx.beginPath();
-                ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
-                ctx.fillStyle = circle.color;
-                ctx.fill();
-                
-                if (circle.y < -circle.radius) {
-                    circles.splice(index, 1);
+            return {
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: 50 + Math.random() * 150,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                speed: 0.01 + Math.random() * 0.02,
+                phase: Math.random() * Math.PI * 2,
+                update: function() {
+                    this.phase += this.speed;
+                },
+                draw: function() {
+                    const gradient = ctx.createRadialGradient(
+                        this.x, this.y, 0,
+                        this.x, this.y, this.radius
+                    );
+                    
+                    const alpha = 0.2 + Math.sin(this.phase) * 0.1;
+                    gradient.addColorStop(0, this.color.replace('0.3', alpha));
+                    gradient.addColorStop(1, this.color.replace('0.3', 0));
+                    
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = gradient;
+                    ctx.fill();
                 }
-            });
-            
-            requestAnimationFrame(animateCircles);
+            };
         }
         
+        function createElements() {
+            particles = [];
+            glowPoints = [];
+            
+            // 创建100个粒子
+            for (let i = 0; i < 100; i++) {
+                particles.push(createParticle());
+            }
+            
+            // 创建3个大型光晕
+            for (let i = 0; i < 3; i++) {
+                glowPoints.push(createGlowPoint());
+            }
+        }
+        
+        // 连接相近粒子
+        function connectParticles() {
+            for (let a = 0; a < particles.length; a++) {
+                for (let b = a; b < particles.length; b++) {
+                    const dx = particles[a].x - particles[b].x;
+                    const dy = particles[a].y - particles[b].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 120) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(220, 220, 255, ${0.5 - distance/240})`;
+                        ctx.lineWidth = 0.3;
+                        ctx.moveTo(particles[a].x, particles[a].y);
+                        ctx.lineTo(particles[b].x, particles[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+        
+        // 绘制背景渐变
+        function drawBackground() {
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, 'rgba(240, 245, 255, 0.8)');  // 顶部淡蓝
+            gradient.addColorStop(0.5, 'rgba(250, 240, 255, 0.8)'); // 中间淡粉紫
+            gradient.addColorStop(1, 'rgba(240, 245, 255, 0.8)');  // 底部淡蓝
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        function animateBackground() {
+            drawBackground();
+            
+            // 绘制光晕
+            glowPoints.forEach(point => {
+                point.update();
+                point.draw();
+            });
+            
+            // 更新和绘制粒子
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            
+            // 连接粒子
+            connectParticles();
+            
+            requestAnimationFrame(animateBackground);
+        }
+        
+        // 初始化背景
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
-        animateCircles();
+        createElements();
+        animateBackground();
         
+        // 原有功能代码保持不变
         function showNotification(message) {
             notification.textContent = message;
             notification.classList.add('show');
